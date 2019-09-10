@@ -57,7 +57,6 @@ if cancel ~= false and num_selected_items > 0 then
     local ns_exe = cli_path .. '/noveltyslice '
 
     --   Get info for item in REAPER
-    local item = reaper.GetSelectedMediaItem(0, 0)
     local take = reaper.GetActiveTake(item)
     local src = reaper.GetMediaItemTake_Source(take)
     local sr = reaper.GetMediaSourceSampleRate(src)
@@ -75,6 +74,7 @@ if cancel ~= false and num_selected_items > 0 then
     local slice_pos = sampstos(t_conversion, sr)
     item = reaper.SplitMediaItem(item, item_pos + slice_pos)
     end
-
+    local kill_cmd = "rm -rf " .. temp_idx
+    os.execute(kill_cmd)
     reaper.UpdateArrange()
 end
