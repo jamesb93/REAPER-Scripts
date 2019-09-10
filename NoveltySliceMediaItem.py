@@ -8,14 +8,14 @@ import subprocess
 def sampstos(samples, sample_rate):
   return float((samples / sample_rate))
 
-cancel, _, _, captions, user_input, _ = RPR_GetUserInputs('Novelty Slice Parameters', 5, 'feature,threshold,kernelsize,filtersize,fftsettings', '0,3,0.5,1,1024 512 1024', 512)
+cancel, _, _, captions, user_input, _ = RPR_GetUserInputs('Novelty Slice Parameters', 5, 'feature,threshold,kernelsize,filtersize,fftsettings', '0,0.5,3,1,1024 512 1024', 512)
 # parse user input
 if cancel != 0:
   params = user_input.split(',')
   
   feature = params[0]
-  kernelsize = params[1]
-  threshold = params[2]
+  threshold = params[1]
+  kernelsize = params[2]
   filtersize = params[3]
   fftsettings = params[4]
   
