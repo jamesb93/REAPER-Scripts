@@ -31,6 +31,13 @@ function tablelen(t)
   for _ in pairs(t) do count = count + 1 end
   return count
 end
+------------------------------------------------------------------------------------
+--   Each user MUST point this to their folder containing FluCoMa CLI executables --
+local cli_path = '/Users/jamesbradbury/dev/bin'
+--   Then we form some calls to the tools that will live in that folder --
+local ie_exe = cli_path .. '/index_extractor '
+local ns_exe = cli_path .. '/noveltyslice '
+------------------------------------------------------------------------------------
 
 function sampstos(samples, sample_rate) return samples / sample_rate end
 local num_selected_items = reaper.CountSelectedMediaItems(0)
@@ -53,12 +60,6 @@ if cancel ~= false and num_selected_items > 0 then
         local fftsettings = params[5]
         
         local temp_idx = proj_path .. "/fluid_novelty_slice_reaper.wav"
-
-        --   Each user MUST point this to their folder containing FluCoMa CLI executables
-        local cli_path = '/Users/jamesbradbury/dev/bin'
-        --   Then we form some calls to the tools that will live in that folder
-        local ie_exe = cli_path .. '/index_extractor '
-        local ns_exe = cli_path .. '/noveltyslice '
 
         --   Get info for item in REAPER
         local take = reaper.GetActiveTake(item)
