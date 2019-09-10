@@ -38,8 +38,6 @@ local num_selected_items = reaper.CountSelectedMediaItems(0)
 if cancel ~= false and num_selected_items > 0 then
     local cancel, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
     local item = reaper.GetSelectedMediaItem(0, 0)
-    local check_selected = reaper.IsMediaItemSelected(0)
-    reaper.ShowConsoleMsg(check_selected)
     local proj_path = reaper.GetProjectPathEx(0, "")
     local proj_name = reaper.GetProjectName(0, "")
 
