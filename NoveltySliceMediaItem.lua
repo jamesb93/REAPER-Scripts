@@ -1,50 +1,19 @@
-function os.capture(cmd, raw)
-    -- How to use
-    -- local output = os.capture("ls", false)
-    local f = assert(io.popen(cmd, 'r'))
-    local s = assert(f:read('*a'))
-    f:close()
-    if raw then return s end
-    s = string.gsub(s, '^%s+', '')
-    s = string.gsub(s, '%s+$', '')
-    s = string.gsub(s, '[\n\r]+', ' ')
-    return s
-end
+-- First we require the utilities found in FluidUtils.lua
+-- This is a horrible workaround specific to REAPER
+-- It forms a manual path to the path of this script
+-- It looks relative to this script and uses dofile to import
+local info = debug.getinfo(1,'S');
+script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+dofile(script_path .. "FluidUtils.lua")
 
-function commasplit(input_string)
-    -- splits by ,
-    local t = {}
-    for word in string.gmatch(input_string, '([^,]+)') do
-        table.insert(t, word)
-    end
-    return t
-end
-
-function spacesplit(input_string)
-    local t = {}
-    for word in input_string:gmatch("%w+") do table.insert(t, word) end
-    return t
-end
-
-function tablelen(t)
-  local count = 0
-  for _ in pairs(t) do count = count + 1 end
-  return count
-end
-
-function doublequote(input_string)
-  return '"'..input_string..'"'
-end
 ------------------------------------------------------------------------------------
 --   Each user MUST point this to their folder containing FluCoMa CLI executables --
-local cli_path = '/Users/jamesbradbury/dev/bad bin'
-local cli_path = doublequote(cli_path)
+sanity_check()
+local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
 local ie_exe = cli_path .. '/index_extractor '
 local ns_exe = cli_path .. '/noveltyslice '
 ------------------------------------------------------------------------------------
-
-function sampstos(samples, sample_rate) return samples / sample_rate end
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if cancel ~= false and num_selected_items > 0 then
@@ -55,18 +24,18 @@ if cancel ~= false and num_selected_items > 0 then
     end
     for k=1, #items do
         local item = items[k]
-        local proj_path = reaper.GetProjectPath(0, "")
-        proj_path = doublequote(proj_path)
-
+        --local proj_path = reaper.GetProjectPath(0, "")
+        --proj_path = doublequote(proj_path)
+        tmp_file = os.tmpname() .. ".wav"
+        temp_idx = doublequote(tmp_file)
+      
         local params = commasplit(user_inputs)
         local feature = params[1]
         local threshold = params[2]
         local kernelsize = params[3]
         local filtersize = params[4]
         local fftsettings = params[5]
-
-        local temp_idx = proj_path .. "/fluid_novelty_slice_reaper.wav"
-        temp_idx = doublequote(temp_idx)
+        
         -- Get info for item in REAPER
         local take = reaper.GetActiveTake(item)
         local src = reaper.GetMediaItemTake_Source(take)
@@ -78,7 +47,7 @@ if cancel ~= false and num_selected_items > 0 then
         local ie_cmd = ie_exe .. " " .. temp_idx
 
         os.execute(ns_cmd)
-        local slice_points_string = os.capture(ie_cmd, false)
+        local slice_points_string = capture(ie_cmd, false)
         local slice_points = spacesplit(slice_points_string)
         for i=2, #slice_points do
             local t_conversion = tonumber(slice_points[i])
