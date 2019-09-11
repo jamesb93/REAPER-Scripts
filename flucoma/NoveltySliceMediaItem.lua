@@ -8,11 +8,13 @@ dofile(script_path .. "FluidUtils.lua")
 
 ------------------------------------------------------------------------------------
 --   Each user MUST point this to their folder containing FluCoMa CLI executables --
-sanity_check()
+if sanity_check() == false then goto exit; end
 local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
-local ie_exe = cli_path .. '/index_extractor '
-local ns_exe = cli_path .. '/noveltyslice '
+local ie_suf = cli_path .. "/index_extractor"
+local ie_exe = doublequote(ie_suf)
+local ns_suf = cli_path .. "/noveltyslice"
+local ns_exe = doublequote(ns_suf)
 ------------------------------------------------------------------------------------
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
@@ -60,3 +62,4 @@ if cancel ~= false and num_selected_items > 0 then
     end
     reaper.UpdateArrange()
 end
+::exit::

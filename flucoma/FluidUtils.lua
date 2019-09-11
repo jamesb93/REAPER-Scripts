@@ -55,14 +55,15 @@ function file_exists(name)
     if f~=nil then io.close(f) return true else return false end
 end
 
-function is_path_valid()
-    local fp = get_fluid_path()
-    local ns = fp .. "/noveltyslice"
-    if file_exists(ns) == true then
+function is_path_valid(input_string)
+    local ns_path = input_string .. "/noveltyslice"
+    if file_exists(ns_path) then
+        reaper.SetExtState("flucoma", "exepath", input_string, 1)
         reaper.ShowMessageBox("The path you set looks good!", "Path Configuration", 0)
-    end
-    if file_exists(ns) == false then
+        return true
+    else
         reaper.ShowMessageBox("The path you set doesn't seem to contain the FluCoMa tools. Please try again.", "Path Configuration", 0)
+        reaper.DeleteExtState("flucoma", "exepath", 1)
         path_setter()
     end
 end
@@ -71,17 +72,18 @@ function path_setter()
     local cancel, input = reaper.GetUserInputs("Set path to FluCoMa Executables", 1, "Path:, extrawidth=100", "/usr/local/bin")
     if cancel ~= false then
         local input_path = rm_trailing_slash(input)
-        local sanitised_input_path = doublequote(input_path)
-        reaper.SetExtState("flucoma", "exepath", sanitised_input_path, 1)
-        is_path_valid()
-    end
-    if cancel == false then
+        -- local sanitised_input_path = doublequote(input_path)
+        if is_path_valid(input_path) == true then return true end
+    else
         reaper.ShowMessageBox("Your path remains unconfigured. The script will now exit.", "Warning", 0)
+        reaper.DeleteExtState("flucoma", "exepath", 1)
+        return false
     end
+    
 end
 
 function set_fluid_path()
-    path_setter()
+    if path_setter() == true then return true else return false end
 end
 
 function check_state()
@@ -91,6 +93,8 @@ end
 function sanity_check()
     if check_state() == false then
         reaper.ShowMessageBox("The path to the FluCoMa CLI tools is not set. Please follow the next prompt to configure it. Doing so remains persistent across projects and sessions of reaper. If you need to change it please use the FluidEditPath.lua script.", "Warning!", 0)
-        set_fluid_path()
+        if set_fluid_path() == true then return true else return false end
     end
+
+    if check_state() == true then return true end
 end
