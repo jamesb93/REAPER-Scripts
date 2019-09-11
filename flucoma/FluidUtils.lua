@@ -1,4 +1,16 @@
-function sampstos(samples, sample_rate) return samples / sample_rate end
+function sampstos(samps_in, sr)
+    return samps_in / sr
+end
+
+function stosamps(secs_in, sr) 
+    return math.floor(secs_in * sr)
+end
+
+function remove_file(file_name)
+    local cmd = "rm -rf " .. file_name
+    os.execute(cmd)
+end
+
 
 function rm_trailing_slash(s)
     -- Remove trailing slash from string. Will not remove slash if it is the

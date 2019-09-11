@@ -1,7 +1,3 @@
--- First we require the utilities found in FluidUtils.lua
--- This is a horrible workaround specific to REAPER
--- It forms a manual path to the path of this script
--- It looks relative to this script and uses dofile to import
 local info = debug.getinfo(1,'S');
 script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 dofile(script_path .. "FluidUtils.lua")
@@ -17,49 +13,80 @@ local ns_suf = cli_path .. "/noveltyslice"
 local ns_exe = doublequote(ns_suf)
 ------------------------------------------------------------------------------------
 
-local num_selected_items = reaper.CountSelectedMediaItems(0)
-if cancel ~= false and num_selected_items > 0 then
+num_selected_items = reaper.CountSelectedMediaItems(0)
+if num_selected_items > 0 then
     local cancel, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
-    local items = {}
-    for x=0, num_selected_items-1 do
-      table.insert(items, reaper.GetSelectedMediaItem(0, x))
+
+    -- Algorithm Parameters
+    local params = commasplit(user_inputs)
+    local feature = params[1]
+    local threshold = params[2]
+    local kernelsize = params[3]
+    local filtersize = params[4]
+    local fftsettings = params[5]
+
+    full_path_t = {}
+    item_pos_t = {}
+    item_len_t = {}
+    item_pos_samples_t = {}
+    item_len_samples_t = {}
+    ns_cmd_t = {}
+    ie_cmd_t = {}
+    slice_points_string_t = {}
+    tmp_file_t = {}
+    tmp_idx_t = {}
+    item_t = {}
+
+    for i=1, num_selected_items do
+        tmp_file = os.tmpname()
+        tmp_idx = doublequote(tmp_file .. ".wav")
+        table.insert(tmp_file_t, tmp_file)
+        table.insert(tmp_idx_t, tmp_idx)
+
+        item = reaper.GetSelectedMediaItem(0, i-1)
+        table.insert(item_t, item)
+        take = reaper.GetActiveTake(item)
+        src = reaper.GetMediaItemTake_Source(take)
+        sr = reaper.GetMediaSourceSampleRate(src)
+        full_path = reaper.GetMediaSourceFileName(src, '')
+        table.insert(full_path_t, full_path)
+
+        item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+        item_len = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+        table.insert(item_pos_t, item_pos)
+        table.insert(item_len_t, item_len)
+        item_pos_samples = stosamps(item_pos, sr)
+        item_len_samples = stosamps(item_len, sr)
+        table.insert(item_pos_samples_t, item_pos_samples)
+        table.insert(item_len_samples_t, item_len_samples)
+
+        ns_cmd = ns_exe .. " -source " .. full_path .. " -indices " .. tmp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. item_pos_samples
+        ie_cmd = ie_exe .. " " .. tmp_idx
+        table.insert(ns_cmd_t, ns_cmd)
+        table.insert(ie_cmd_t, ie_cmd)
     end
-    for k=1, #items do
-        local item = items[k]
-        --local proj_path = reaper.GetProjectPath(0, "")
-        --proj_path = doublequote(proj_path)
-        tmp_file = os.tmpname() .. ".wav"
-        temp_idx = doublequote(tmp_file)
-      
-        local params = commasplit(user_inputs)
-        local feature = params[1]
-        local threshold = params[2]
-        local kernelsize = params[3]
-        local filtersize = params[4]
-        local fftsettings = params[5]
-        
-        -- Get info for item in REAPER
-        local take = reaper.GetActiveTake(item)
-        local src = reaper.GetMediaItemTake_Source(take)
-        local sr = reaper.GetMediaSourceSampleRate(src)
-        local full_path = reaper.GetMediaSourceFileName(src, '')
-        full_path = doublequote(full_path)
-        local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-        local ns_cmd = ns_exe .. " -source " .. full_path .. " -indices " .. temp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings
-        local ie_cmd = ie_exe .. " " .. temp_idx
 
-        os.execute(ns_cmd)
-        local slice_points_string = capture(ie_cmd, false)
-        local slice_points = spacesplit(slice_points_string)
-        for i=2, #slice_points do
-            local t_conversion = tonumber(slice_points[i])
-            local slice_pos = sampstos(t_conversion, sr)
-            item = reaper.SplitMediaItem(item, item_pos + slice_pos)
+    -- Fill the table with slice points
+    for i=1, num_selected_items do
+        os.execute(ns_cmd_t[i])
+        table.insert(slice_points_string_t, capture(ie_cmd_t[i], false))
+    end
+
+    -- Execution
+    for i=1, num_selected_items do
+        local slice_points = spacesplit(slice_points_string_t[i])
+        for j=2, #slice_points do
+            slice_pos = sampstos(
+                tonumber(slice_points[j]), sr
+            )
+            item_t[i] = reaper.SplitMediaItem(item_t[i], item_pos_t[i] + slice_pos)
         end
-
-        local kill_cmd = "rm -rf " .. temp_idx
-        os.execute(kill_cmd)
     end
     reaper.UpdateArrange()
+
+    for i=1, num_selected_items do
+        remove_file(tmp_idx_t[i])
+        remove_file(tmp_file_t[i])
+    end
 end
 ::exit::
