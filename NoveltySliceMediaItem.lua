@@ -31,15 +31,21 @@ function tablelen(t)
   for _ in pairs(t) do count = count + 1 end
   return count
 end
+
+function doublequote(input_string)
+  return '"'..input_string..'"'
+end
 ------------------------------------------------------------------------------------
 --   Each user MUST point this to their folder containing FluCoMa CLI executables --
-local cli_path = '/Users/jamesbradbury/dev/bin'
+local cli_path = '/Users/jamesbradbury/dev/bad bin'
+local cli_path = doublequote(cli_path)
 --   Then we form some calls to the tools that will live in that folder --
 local ie_exe = cli_path .. '/index_extractor '
 local ns_exe = cli_path .. '/noveltyslice '
 ------------------------------------------------------------------------------------
 
 function sampstos(samples, sample_rate) return samples / sample_rate end
+
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if cancel ~= false and num_selected_items > 0 then
     local cancel, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
@@ -47,10 +53,10 @@ if cancel ~= false and num_selected_items > 0 then
     for x=0, num_selected_items-1 do
       table.insert(items, reaper.GetSelectedMediaItem(0, x))
     end
-    for k in pairs(items) do
+    for k=1, #items do
         local item = items[k]
-        local proj_path = reaper.GetProjectPathEx(0, "")
-        local proj_name = reaper.GetProjectName(0, "")
+        local proj_path = reaper.GetProjectPath(0, "")
+        proj_path = doublequote(proj_path)
 
         local params = commasplit(user_inputs)
         local feature = params[1]
@@ -58,14 +64,15 @@ if cancel ~= false and num_selected_items > 0 then
         local kernelsize = params[3]
         local filtersize = params[4]
         local fftsettings = params[5]
-        
-        local temp_idx = proj_path .. "/fluid_novelty_slice_reaper.wav"
 
-        --   Get info for item in REAPER
+        local temp_idx = proj_path .. "/fluid_novelty_slice_reaper.wav"
+        temp_idx = doublequote(temp_idx)
+        -- Get info for item in REAPER
         local take = reaper.GetActiveTake(item)
         local src = reaper.GetMediaItemTake_Source(take)
         local sr = reaper.GetMediaSourceSampleRate(src)
         local full_path = reaper.GetMediaSourceFileName(src, '')
+        full_path = doublequote(full_path)
         local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
         local ns_cmd = ns_exe .. " -source " .. full_path .. " -indices " .. temp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings
         local ie_cmd = ie_exe .. " " .. temp_idx
@@ -73,7 +80,6 @@ if cancel ~= false and num_selected_items > 0 then
         os.execute(ns_cmd)
         local slice_points_string = os.capture(ie_cmd, false)
         local slice_points = spacesplit(slice_points_string)
-
         for i=2, #slice_points do
             local t_conversion = tonumber(slice_points[i])
             local slice_pos = sampstos(t_conversion, sr)
