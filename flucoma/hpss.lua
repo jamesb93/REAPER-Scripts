@@ -1,5 +1,5 @@
 local info = debug.getinfo(1,'S');
-script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
 dofile(script_path .. "FluidUtils.lua")
 
 ------------------------------------------------------------------------------------
@@ -80,7 +80,6 @@ if num_selected_items > 0 then
                 " -maskingmode " .. maskingmode .. " -harmthresh " .. hthresh .. " -percthresh " .. pthresh ..
                 " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples)
         end
-
         -- Execute NMF Process
         for i=1, num_selected_items do
             os.execute(hpss_cmd_t[i])
