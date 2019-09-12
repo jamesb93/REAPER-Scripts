@@ -27,19 +27,19 @@ if num_selected_items > 0 then
         local hthresh = params[5]
         local pthresh = params[6]
 
-        item_t = {}
+        local item_t = {}
         local sr_t = {}
-        full_path_t = {}
+        local full_path_t = {}
         local take_ofs_t = {}
         local take_ofs_samples_t = {}
         local item_pos_t = {}
         local item_len_t = {}
         local item_pos_samples_t = {}
         local item_len_samples_t = {}
-        hpss_cmd_t = {}
-        harm_t = {}
-        perc_t = {}
-        resi_t = {}
+        local hpss_cmd_t = {}
+        local harm_t = {}
+        local perc_t = {}
+        local resi_t = {}
 
         for i=1, num_selected_items do
             local item = reaper.GetSelectedMediaItem(0, i-1)
@@ -60,9 +60,9 @@ if num_selected_items > 0 then
 
             -- Now make the name for the separated parts using the offset to create a unique id --
             -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
-            table.insert(harm_t, basename(full_path) .. "_h_" .. tostring(take_ofs) .. ".wav")
-            table.insert(perc_t, basename(full_path) .. "_p_" .. tostring(take_ofs) .. ".wav")
-            table.insert(resi_t, basename(full_path) .. "_r_" .. tostring(take_ofs) .. ".wav")
+            table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. ".wav")
+            table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. ".wav")
+            table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. ".wav")
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
