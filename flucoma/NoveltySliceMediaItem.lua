@@ -30,13 +30,15 @@ if num_selected_items > 0 then
         local item_len_t = {}
         local item_pos_samples_t = {}
         local item_len_samples_t = {}
-        local ns_cmd_t = {}
-        local ie_cmd_t = {}
-        local slice_points_string_t = {}
+        ns_cmd_t = {}
+        ie_cmd_t = {}
+        slice_points_string_t = {}
         local tmp_file_t = {}
         local tmp_idx_t = {}
-        local item_t = {}
+        item_t = {}
         local sr_t = {}
+        take_ofs_t = {}
+        take_ofs_samples_t = {}
 
         for i=1, num_selected_items do
             local tmp_file = os.tmpname()
@@ -52,17 +54,22 @@ if num_selected_items > 0 then
             table.insert(sr_t, sr)
             local full_path = reaper.GetMediaSourceFileName(src, '')
             table.insert(full_path_t, full_path)
-
+            
+            take_ofs = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
             local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
             local item_len = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
             table.insert(item_pos_t, item_pos)
             table.insert(item_len_t, item_len)
+            table.insert(take_ofs_t, take_ofs)
+            -- Convert everything to samples for CLI --
+            take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
             local item_len_samples = stosamps(item_len, sr)
+            table.insert(take_ofs_samples_t, take_ofs_samples)
             table.insert(item_pos_samples_t, item_pos_samples)
             table.insert(item_len_samples_t, item_len_samples)
 
-            local ns_cmd = ns_exe .. " -source " .. doublequote(full_path) .. " -indices " .. tmp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. item_pos_samples
+            local ns_cmd = ns_exe .. " -source " .. doublequote(full_path) .. " -indices " .. doublequote(tmp_idx) .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples
             local ie_cmd = ie_exe .. " " .. tmp_idx
             table.insert(ns_cmd_t, ns_cmd)
             table.insert(ie_cmd_t, ie_cmd)
@@ -81,7 +88,7 @@ if num_selected_items > 0 then
                 slice_pos = sampstos(
                     tonumber(slice_points[j]), sr_t[i]
                 )
-                item_t[i] = reaper.SplitMediaItem(item_t[i], item_pos_t[i] + slice_pos)
+                item_t[i] = reaper.SplitMediaItem(item_t[i], item_pos_t[i] + (slice_pos - take_ofs_t[i]))
             end
         end
         reaper.UpdateArrange()
