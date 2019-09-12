@@ -17,6 +17,7 @@ local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local confirm, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
     if confirm then
+        reaper.Undo_BeginBlock()
         -- Algorithm Parameters
         local params = commasplit(user_inputs)
         local feature = params[1]
@@ -93,7 +94,7 @@ if num_selected_items > 0 then
             end
         end
         reaper.UpdateArrange()
-
+        reaper.Undo_EndBlock("noveltyslice", 0)
         for i=1, num_selected_items do
             remove_file(tmp_idx_t[i])
             remove_file(tmp_file_t[i])
