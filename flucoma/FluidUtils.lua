@@ -11,6 +11,14 @@ function remove_file(file_name)
     os.execute(cmd)
 end
 
+function basedir(str,sep)
+    sep=sep or'/'
+    return str:match("(.*"..sep..")")
+end
+
+function basename(input_string)
+    return input_string:match("(.+)%..+")
+end
 
 function rm_trailing_slash(s)
     -- Remove trailing slash from string. Will not remove slash if it is the
