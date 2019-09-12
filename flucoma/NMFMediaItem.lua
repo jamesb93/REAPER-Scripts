@@ -15,6 +15,7 @@ local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local confirm, user_inputs = reaper.GetUserInputs("NMF Parameters", 3, "components,iterations,fftsettings", "2, 100, 1024 512 1024")
     if confirm then 
+        reaper.Undo_BeginBlock()
         -- Algorithm Parameters
         local params = commasplit(user_inputs)
         local components = params[1]
@@ -78,6 +79,7 @@ if num_selected_items > 0 then
             reaper.InsertMedia(components_t[i],3)    
         end
         reaper.UpdateArrange()
+        reaper.Undo_EndBlock("NMF", 0)
     end
 end
 ::exit::
