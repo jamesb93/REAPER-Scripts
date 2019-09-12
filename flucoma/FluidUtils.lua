@@ -64,7 +64,7 @@ function doublequote(input_string)
   return '"'..input_string..'"'
 end
 
--- Functions pertaining to setting state --
+---------- Functions for to setting state ----------
 
 function get_fluid_path()
     return reaper.GetExtState("flucoma", "exepath")
@@ -76,7 +76,13 @@ function file_exists(name)
 end
 
 function is_path_valid(input_string)
-    local ns_path = input_string .. "/noveltyslice"
+    local operating_system = reaper.GetOS()
+    local check_table = {}
+    check_table["Win64"] = "/noveltyslice.exe"
+    check_table["OSX64"] = "/noveltyslice"
+
+    local ns_path = input_string .. check_table[operating_system]
+    reaper.ShowConsoleMsg(ns_path)
     if file_exists(ns_path) then
         reaper.SetExtState("flucoma", "exepath", input_string, 1)
         reaper.ShowMessageBox("The path you set looks good!", "Path Configuration", 0)
