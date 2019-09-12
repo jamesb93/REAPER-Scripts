@@ -13,7 +13,7 @@ local ns_suf = cli_path .. "/noveltyslice"
 local ns_exe = doublequote(ns_suf)
 ------------------------------------------------------------------------------------
 
-num_selected_items = reaper.CountSelectedMediaItems(0)
+local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local cancel, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
 
