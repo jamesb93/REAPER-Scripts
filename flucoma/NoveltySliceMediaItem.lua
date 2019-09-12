@@ -62,7 +62,7 @@ if num_selected_items > 0 then
         table.insert(item_pos_samples_t, item_pos_samples)
         table.insert(item_len_samples_t, item_len_samples)
 
-        local ns_cmd = ns_exe .. " -source " .. full_path .. " -indices " .. tmp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. item_pos_samples
+        local ns_cmd = ns_exe .. " -source " .. doublequote(full_path) .. " -indices " .. tmp_idx .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. item_pos_samples
         local ie_cmd = ie_exe .. " " .. tmp_idx
         table.insert(ns_cmd_t, ns_cmd)
         table.insert(ie_cmd_t, ie_cmd)
