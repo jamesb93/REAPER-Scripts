@@ -80,7 +80,8 @@ if num_selected_items > 0 then
 
             local ts_cmd = ts_exe .. " -source " .. doublequote(full_path) .. " -indices " .. doublequote(tmp_idx) .. 
             " -order " .. order .. " -blocksize " .. blocksize .. 
-            " -padsize " .. padsize .. " -skew " .. skew .. " -threshfwd " .. threshfwd ..
+            " -padsize " .. padsize .. " -skew " .. skew .. 
+            " -threshfwd " .. threshfwd .. " -threshback " .. threshback ..
             " -windowsize " .. windowsize .. " -clumplength " .. clumplength .. " -minslicelength " .. minslicelength ..
             " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples
 
@@ -94,7 +95,6 @@ if num_selected_items > 0 then
             os.execute(ts_cmd_t[i])
             table.insert(slice_points_string_t, capture(ie_cmd_t[i], false))
         end
-        reaper.ShowConsoleMsg(ts_cmd_t[1])
         -- Execution
         for i=1, num_selected_items do
             slice_points = spacesplit(slice_points_string_t[i])
