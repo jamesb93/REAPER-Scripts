@@ -30,15 +30,15 @@ if num_selected_items > 0 then
         local item_len_t = {}
         local item_pos_samples_t = {}
         local item_len_samples_t = {}
-        ns_cmd_t = {}
-        ie_cmd_t = {}
-        slice_points_string_t = {}
+        local ns_cmd_t = {}
+        local ie_cmd_t = {}
+        local slice_points_string_t = {}
         local tmp_file_t = {}
         local tmp_idx_t = {}
-        item_t = {}
+        local item_t = {}
         local sr_t = {}
-        take_ofs_t = {}
-        take_ofs_samples_t = {}
+        local take_ofs_t = {}
+        local take_ofs_samples_t = {}
 
         for i=1, num_selected_items do
             local tmp_file = os.tmpname()
@@ -47,22 +47,23 @@ if num_selected_items > 0 then
             table.insert(tmp_idx_t, tmp_idx)
 
             local item = reaper.GetSelectedMediaItem(0, i-1)
-            table.insert(item_t, item)
             local take = reaper.GetActiveTake(item)
             local src = reaper.GetMediaItemTake_Source(take)
             local sr = reaper.GetMediaSourceSampleRate(src)
-            table.insert(sr_t, sr)
             local full_path = reaper.GetMediaSourceFileName(src, '')
+            table.insert(item_t, item)
+            table.insert(sr_t, sr)
             table.insert(full_path_t, full_path)
             
-            take_ofs = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
+            local take_ofs = reaper.GetMediaItemTakeInfo_Value(take, "D_STARTOFFS")
             local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
             local item_len = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
+            table.insert(take_ofs_t, take_ofs)
             table.insert(item_pos_t, item_pos)
             table.insert(item_len_t, item_len)
-            table.insert(take_ofs_t, take_ofs)
+        
             -- Convert everything to samples for CLI --
-            take_ofs_samples = stosamps(take_ofs, sr)
+            local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
             local item_len_samples = stosamps(item_len, sr)
             table.insert(take_ofs_samples_t, take_ofs_samples)
