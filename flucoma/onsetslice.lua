@@ -17,7 +17,7 @@ local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local captions = "metric,threshold,minslicelength,filtersize,framedelta,fftsettings"
     local caption_defaults = "0,0.5,2,5,0,1024 512 1024"
-    local confirm, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 6, captions, caption_defaults)
+    local confirm, user_inputs = reaper.GetUserInputs("Onset Slice Parameters", 6, captions, caption_defaults)
 
     if confirm then
         reaper.Undo_BeginBlock()
