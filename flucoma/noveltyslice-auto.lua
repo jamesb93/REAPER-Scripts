@@ -145,15 +145,19 @@ function tablelen(t)
   return count
 end
 
+function slice(thresh)
+    noveltyslice(src, idx, "0", thresh, "7", "3", "2048 -1 -1")
+end
+
 
 -------- WORKING PROTOTYPE --------
 start = os.clock()
 math.randomseed(os.clock() * 100000000000)
 
-
 src = "/Users/jamesbradbury/Desktop/auto_thresh/aswine.wav"
 idx = "/Users/jamesbradbury/Desktop/auto_thresh/out1.wav"
-target_slices = 7
+target_slices = tonumber(arg[1])
+print(target_slices)
 max_iter = 100
 iter = 0
 init_thresh = 0.1
@@ -162,7 +166,7 @@ read_cmd = "/Users/jamesbradbury/dev/bin/index_extractor" .. " " .. idx
 local num_slices = 0
 while iter ~= max_iter do
     if iter == 0 then -- on our first loop we have to initialise
-        noveltyslice(src, idx, "0", tostring(init_thresh), "3", "1", "1024 -1 -1")
+        slice(tostring(curr_thresh))
         num_slices = tablelen(spacesplit(capture(read_cmd, false)))
         curr_thresh = init_thresh
     else
@@ -170,12 +174,12 @@ while iter ~= max_iter do
 
         if num_slices > target_slices then 
             curr_thresh = curr_thresh * (1.23 + (math.random() * 0.05))
-            noveltyslice(src, idx, "0", tostring(curr_thresh), "3", "1", "1024 -1 -1")
+            slice(tostring(curr_thresh))
             num_slices = tablelen(spacesplit(capture(read_cmd, false)))
         end
         if num_slices < target_slices then
             curr_thresh = curr_thresh * (0.8 + (math.random() * 0.05))
-            noveltyslice(src, idx, "0", tostring(curr_thresh), "3", "1", "1024 -1 -1")
+            slice(tostring(curr_thresh))
             num_slices = tablelen(spacesplit(capture(read_cmd, false)))
         end
     end
