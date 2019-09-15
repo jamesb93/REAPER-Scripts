@@ -3,7 +3,7 @@ function sampstos(samps_in, sr)
 end
 
 function stosamps(secs_in, sr) 
-    return math.floor(secs_in * sr)
+    return math.floor((secs_in * sr) + 0.5)
 end
 
 function remove_file(file_name)
