@@ -62,7 +62,7 @@ if num_selected_items > 0 then
             -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
             table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. ".wav")
             table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. ".wav")
-            table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. ".wav")
+            if maskingmode == "2" then table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. ".wav") end
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
@@ -70,15 +70,37 @@ if num_selected_items > 0 then
             table.insert(take_ofs_samples_t, take_ofs_samples)
             table.insert(item_pos_samples_t, item_pos_samples)
             table.insert(item_len_samples_t, item_len_samples)
+
+            if maskingmode == "0" then
+                -- Form the commands to shell and store in a table --
+                table.insert(hpss_cmd_t, hpss_exe .. " -source " .. doublequote(full_path) .. 
+                    " -harmonic " .. doublequote(harm_t[i]) .. 
+                    " -percussive " .. doublequote(perc_t[i]) ..  
+                    " -harmfiltersize " .. hfs .. " -percfiltersize " .. pfs .. 
+                    " -maskingmode " .. maskingmode ..
+                    " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples)
+            end
+
+            if maskingmode == "1" then
+                -- Form the commands to shell and store in a table --
+                table.insert(hpss_cmd_t, hpss_exe .. " -source " .. doublequote(full_path) .. 
+                    " -harmonic " .. doublequote(harm_t[i]) .. 
+                    " -percussive " .. doublequote(perc_t[i]) ..  
+                    " -harmfiltersize " .. hfs .. " -percfiltersize " .. pfs .. 
+                    " -maskingmode " .. maskingmode .. " -harmthresh " .. hthresh ..
+                    " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples)
+            end
             
-            -- Form the commands to shell and store in a table --
-            table.insert(hpss_cmd_t, hpss_exe .. " -source " .. doublequote(full_path) .. 
-                " -harmonic " .. doublequote(harm_t[i]) .. 
-                " -percussive " .. doublequote(perc_t[i]) .. 
-                " -residual " .. doublequote(resi_t[i]) .. 
-                " -harmfiltersize " .. hfs .. " -percfiltersize " .. pfs .. 
-                " -maskingmode " .. maskingmode .. " -harmthresh " .. hthresh .. " -percthresh " .. pthresh ..
-                " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples)
+            if maskingmode == "2" then
+                -- Form the commands to shell and store in a table --
+                table.insert(hpss_cmd_t, hpss_exe .. " -source " .. doublequote(full_path) .. 
+                    " -harmonic " .. doublequote(harm_t[i]) .. 
+                    " -percussive " .. doublequote(perc_t[i]) .. 
+                    " -residual " .. doublequote(resi_t[i]) .. 
+                    " -harmfiltersize " .. hfs .. " -percfiltersize " .. pfs .. 
+                    " -maskingmode " .. maskingmode .. " -harmthresh " .. hthresh .. " -percthresh " .. pthresh ..
+                    " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples)
+            end
         end
         -- Execute NMF Process
         for i=1, num_selected_items do
@@ -89,8 +111,9 @@ if num_selected_items > 0 then
             if i > 1 then reaper.SetMediaItemSelected(item_t[i-1], false) end
             reaper.SetMediaItemSelected(item_t[i], true)
             reaper.InsertMedia(harm_t[i],3)
-            reaper.InsertMedia(perc_t[i],3)    
-            reaper.InsertMedia(resi_t[i],3)    
+            reaper.InsertMedia(perc_t[i],3)
+
+            if maskingmode == "2" then reaper.InsertMedia(resi_t[i],3) end
         end
         reaper.UpdateArrange()
         reaper.Undo_EndBlock("HPSS", 0)
