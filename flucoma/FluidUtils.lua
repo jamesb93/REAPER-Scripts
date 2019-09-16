@@ -28,7 +28,7 @@ function rm_trailing_slash(s)
 
 function capture(cmd, raw)
     -- How to use
-    -- local output = os.capture("ls", false)
+    -- local output = capture("ls", false)
     local f = assert(io.popen(cmd, 'r'))
     local s = assert(f:read('*a'))
     f:close()
