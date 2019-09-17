@@ -59,8 +59,8 @@ if num_selected_items > 0 then
 
             -- Now make the name for the separated parts using the offset to create a unique id --
             -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
-            table.insert(sines_t, basename(full_path) .. "_s-sines_" .. tostring(take_ofs) .. ".wav")
-            table.insert(resid_t, basename(full_path) .. "_s-residual_" .. tostring(take_ofs) .. ".wav")
+            table.insert(sines_t, basename(full_path) .. "_sines-s_" .. tostring(take_ofs) .. threshold .. bandwidth .. ".wav")
+            table.insert(resid_t, basename(full_path) .. "_sines-r_" .. tostring(take_ofs) .. threshold .. bandwidth .. ".wav")
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
