@@ -14,7 +14,7 @@ local hpss_exe = doublequote(hpss_suf)
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local captions = "harmfiltersize,percfiltersize,maskingmode,fftsettings,harmthresh,percthresh"
-    local caption_defaults = "17, 31, 0 , 1024 512 1024, 0.0 1.0 1.0 1.0, 0.0 1.0 1.0 1.0"
+    local caption_defaults = "17,31,0,1024 512 1024,0.0 1.0 1.0 1.0,0.0 1.0 1.0 1.0"
     local confirm, user_inputs = reaper.GetUserInputs("HPSS Parameters", 6, captions, caption_defaults)
     if confirm then 
         reaper.Undo_BeginBlock()
@@ -60,9 +60,9 @@ if num_selected_items > 0 then
 
             -- Now make the name for the separated parts using the offset to create a unique id --
             -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
-            table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. ".wav")
-            table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. ".wav")
-            if maskingmode == "2" then table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. ".wav") end
+            table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. maskingmode .. ".wav")
+            table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. maskingmode .. ".wav")
+            if maskingmode == "2" then table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. maskingmode .. ".wav") end
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
