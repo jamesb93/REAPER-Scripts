@@ -7,8 +7,6 @@ dofile(script_path .. "FluidUtils.lua")
 if sanity_check() == false then goto exit; end
 local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
-local ie_suf = cli_path .. "/index_extractor"
-local ie_exe = doublequote(ie_suf)
 local os_suf = cli_path .. "/fluid-onsetslice"
 local os_exe = doublequote(os_suf)
 ------------------------------------------------------------------------------------
@@ -36,7 +34,6 @@ if num_selected_items > 0 then
         local item_pos_samples_t = {}
         local item_len_samples_t = {}
         local os_cmd_t = {}
-        local ie_cmd_t = {}
         local slice_points_string_t = {}
         local tmp_file_t = {}
         local tmp_idx_t = {}
@@ -47,7 +44,7 @@ if num_selected_items > 0 then
 
         for i=1, num_selected_items do
             local tmp_file = os.tmpname()
-            local tmp_idx = doublequote(tmp_file .. ".wav")
+            local tmp_idx = tmp_file .. ".csv"
             table.insert(tmp_file_t, tmp_file)
             table.insert(tmp_idx_t, tmp_idx)
 
@@ -80,20 +77,18 @@ if num_selected_items > 0 then
             " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -framedelta " .. framedelta ..
             " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples
 
-            local ie_cmd = ie_exe .. " " .. tmp_idx
             table.insert(os_cmd_t, os_cmd)
-            table.insert(ie_cmd_t, ie_cmd)
         end
 
         -- Fill the table with slice points
         for i=1, num_selected_items do
             os.execute(os_cmd_t[i])
-            table.insert(slice_points_string_t, capture(ie_cmd_t[i], false))
+            table.insert(slice_points_string_t, readfile(tmp_idx_t[i]))
         end
 
         -- Execution
         for i=1, num_selected_items do
-            local slice_points = spacesplit(slice_points_string_t[i])
+            local slice_points = commasplit(slice_points_string_t[i])
             for j=2, #slice_points do
                 slice_pos = sampstos(
                     tonumber(slice_points[j]), sr_t[i]
