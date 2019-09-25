@@ -7,14 +7,14 @@ dofile(script_path .. "FluidUtils.lua")
 if sanity_check() == false then goto exit; end
 local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
-local hpss_suf = cli_path .. "/hpss"
+local hpss_suf = cli_path .. "/fluid-hpss"
 local hpss_exe = doublequote(hpss_suf)
 ------------------------------------------------------------------------------------
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
     local captions = "harmfiltersize,percfiltersize,maskingmode,fftsettings,harmthresh,percthresh"
-    local caption_defaults = "17, 31, 0 , 1024 512 1024, 0.0 1.0 1.0 1.0, 0.0 1.0 1.0 1.0"
+    local caption_defaults = "17,31,0,1024 512 1024,0.0 1.0 1.0 1.0,0.0 1.0 1.0 1.0"
     local confirm, user_inputs = reaper.GetUserInputs("HPSS Parameters", 6, captions, caption_defaults)
     if confirm then 
         reaper.Undo_BeginBlock()
@@ -26,6 +26,7 @@ if num_selected_items > 0 then
         local fftsettings = params[4]
         local hthresh = params[5]
         local pthresh = params[6]
+        local identifier = rmdelim(hfs .. pfs .. maskingmode .. fftsettings .. hthresh .. pthresh)
 
         local item_t = {}
         local sr_t = {}
@@ -59,10 +60,10 @@ if num_selected_items > 0 then
             table.insert(item_len_t, item_len)
 
             -- Now make the name for the separated parts using the offset to create a unique id --
-            -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
-            table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. ".wav")
-            table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. ".wav")
-            if maskingmode == "2" then table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. ".wav") end
+            -- Using the offset means that slices won't share names at the output in the situation where you process segments --
+            table.insert(harm_t, basename(full_path) .. "_hpss-h_" .. tostring(take_ofs) .. identifier .. ".wav")
+            table.insert(perc_t, basename(full_path) .. "_hpss-p_" .. tostring(take_ofs) .. identifier .. ".wav")
+            if maskingmode == "2" then table.insert(resi_t, basename(full_path) .. "_hpss-r_" .. tostring(take_ofs) .. identifier .. ".wav") end
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)

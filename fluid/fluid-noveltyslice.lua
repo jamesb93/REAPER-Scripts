@@ -7,36 +7,29 @@ dofile(script_path .. "FluidUtils.lua")
 if sanity_check() == false then goto exit; end
 local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
-local ie_suf = cli_path .. "/index_extractor"
-local ie_exe = doublequote(ie_suf)
-local os_suf = cli_path .. "/onsetslice"
-local os_exe = doublequote(os_suf)
+local ns_suf = cli_path .. "/fluid-noveltyslice"
+local ns_exe = doublequote(ns_suf)
 ------------------------------------------------------------------------------------
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
-    local captions = "metric,threshold,minslicelength,filtersize,framedelta,fftsettings"
-    local caption_defaults = "0,0.5,2,5,0,1024 512 1024"
-    local confirm, user_inputs = reaper.GetUserInputs("Onset Slice Parameters", 6, captions, caption_defaults)
-
+    local confirm, user_inputs = reaper.GetUserInputs("Novelty Slice Parameters", 5, "feature,threshold,kernelsize,filtersize,fftsettings", "0,0.5,3,1,1024 512 1024")
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
         local params = commasplit(user_inputs)
-        local metric = params[1]
+        local feature = params[1]
         local threshold = params[2]
-        local minslicelength = params[3]
+        local kernelsize = params[3]
         local filtersize = params[4]
-        local framedelta = params[5]
-        local fftsettings = params[6]
+        local fftsettings = params[5]
 
         local full_path_t = {}
         local item_pos_t = {}
         local item_len_t = {}
         local item_pos_samples_t = {}
         local item_len_samples_t = {}
-        local os_cmd_t = {}
-        local ie_cmd_t = {}
+        local ns_cmd_t = {}
         local slice_points_string_t = {}
         local tmp_file_t = {}
         local tmp_idx_t = {}
@@ -47,7 +40,7 @@ if num_selected_items > 0 then
 
         for i=1, num_selected_items do
             local tmp_file = os.tmpname()
-            local tmp_idx = doublequote(tmp_file .. ".wav")
+            local tmp_idx = tmp_file .. ".csv"
             table.insert(tmp_file_t, tmp_file)
             table.insert(tmp_idx_t, tmp_idx)
 
@@ -75,25 +68,20 @@ if num_selected_items > 0 then
             table.insert(item_pos_samples_t, item_pos_samples)
             table.insert(item_len_samples_t, item_len_samples)
 
-            local os_cmd = os_exe .. " -source " .. doublequote(full_path) .. " -indices " .. doublequote(tmp_idx) .. 
-            " -metric " .. metric .. " -minslicelength " .. minslicelength .. 
-            " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -framedelta " .. framedelta ..
-            " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples
-
-            local ie_cmd = ie_exe .. " " .. tmp_idx
-            table.insert(os_cmd_t, os_cmd)
-            table.insert(ie_cmd_t, ie_cmd)
+            local ns_cmd = ns_exe .. " -source " .. doublequote(full_path) .. " -indices " .. doublequote(tmp_idx) .. " -feature " .. feature .. " -kernelsize " .. kernelsize .. " -threshold " .. threshold .. " -filtersize " .. filtersize .. " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples
+            table.insert(ns_cmd_t, ns_cmd)
         end
 
         -- Fill the table with slice points
         for i=1, num_selected_items do
-            os.execute(os_cmd_t[i])
-            table.insert(slice_points_string_t, capture(ie_cmd_t[i], false))
+            os.execute(ns_cmd_t[i])
+            table.insert(slice_points_string_t, readfile(tmp_idx_t[i]))
+            -- table.insert(slice_points_string_t, capture(ie_cmd_t[      i], false))
         end
 
         -- Execution
         for i=1, num_selected_items do
-            local slice_points = spacesplit(slice_points_string_t[i])
+            local slice_points = commasplit(slice_points_string_t[i])
             for j=2, #slice_points do
                 slice_pos = sampstos(
                     tonumber(slice_points[j]), sr_t[i]
@@ -102,7 +90,7 @@ if num_selected_items > 0 then
             end
         end
         reaper.UpdateArrange()
-        reaper.Undo_EndBlock("onsetslice", 0)
+        reaper.Undo_EndBlock("noveltyslice", 0)
         for i=1, num_selected_items do
             remove_file(tmp_idx_t[i])
             remove_file(tmp_file_t[i])

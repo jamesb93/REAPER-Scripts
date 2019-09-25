@@ -24,11 +24,11 @@ function rm_trailing_slash(s)
     -- Remove trailing slash from string. Will not remove slash if it is the
     -- only character in the string.
     return s:gsub('(.)%/$', '%1')
-  end
+end
 
 function capture(cmd, raw)
     -- How to use
-    -- local output = os.capture("ls", false)
+    -- local output = capture("ls", false)
     local f = assert(io.popen(cmd, 'r'))
     local s = assert(f:read('*a'))
     f:close()
@@ -37,6 +37,14 @@ function capture(cmd, raw)
     s = string.gsub(s, '%s+$', '')
     s = string.gsub(s, '[\n\r]+', ' ')
     return s
+end
+
+-- Used for reading CSV files into a variable --
+function readfile(file)
+    local f = assert(io.open(file, "r"))
+    local content = f:read("*all")
+    f:close()
+    return content
 end
 
 function commasplit(input_string)
@@ -52,6 +60,12 @@ function spacesplit(input_string)
     local t = {}
     for word in input_string:gmatch("%w+") do table.insert(t, word) end
     return t
+end
+
+function rmdelim(input_string)
+    local nodots = input_string.gsub(input_string, "%.", "")
+    local nospace = nodots.gsub(nodots, "%s", "")
+    return nospace
 end
 
 function tablelen(t)
@@ -78,11 +92,11 @@ end
 function is_path_valid(input_string)
     local operating_system = reaper.GetOS()
     local check_table = {}
-    check_table["Win64"] = "/noveltyslice.exe"
-    check_table["OSX64"] = "/noveltyslice"
+    check_table["Win64"] = "/fluid-noveltyslice.exe"
+    check_table["OSX64"] = "/fluid-noveltyslice"
 
     local ns_path = input_string .. check_table[operating_system]
-    reaper.ShowConsoleMsg(ns_path)
+
     if file_exists(ns_path) then
         reaper.SetExtState("flucoma", "exepath", input_string, 1)
         reaper.ShowMessageBox("The path you set looks good!", "Path Configuration", 0)
