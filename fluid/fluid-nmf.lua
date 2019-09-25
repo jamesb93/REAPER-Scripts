@@ -7,7 +7,7 @@ dofile(script_path .. "FluidUtils.lua")
 if sanity_check() == false then goto exit; end
 local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
-local nmf_suf = cli_path .. "/nmf"
+local nmf_suf = cli_path .. "/fluid-nmf"
 local nmf_exe = doublequote(nmf_suf)
 ------------------------------------------------------------------------------------
 
@@ -21,6 +21,7 @@ if num_selected_items > 0 then
         local components = params[1]
         local iterations = params[2]
         local fftsettings = params[3]
+        local identifier = rmdelim(components .. iterations .. fftsettings)
 
         local sr_t = {}
         local item_t = {}
@@ -33,6 +34,7 @@ if num_selected_items > 0 then
         local item_len_samples_t = {}
         local take_ofs_t = {}
         local take_ofs_samples_t = {}
+
 
         for i=1, num_selected_items do
 
@@ -55,7 +57,7 @@ if num_selected_items > 0 then
 
             -- Now make the name for the component.wav using the offset to create a unique id --
             -- Using the offset means that slices won't share names at the output in the situation where you nmf on segments --
-            table.insert(components_t, basename(full_path) .. "_c_" .. tostring(take_ofs) .. ".wav")
+            table.insert(components_t, basename(full_path) .. "_nmf_" .. tostring(take_ofs) .. identifier .. ".wav")
 
             local take_ofs_samples = stosamps(take_ofs, sr)
             local item_pos_samples = stosamps(item_pos, sr)
@@ -64,7 +66,11 @@ if num_selected_items > 0 then
             table.insert(item_pos_samples_t, item_pos_samples)
             table.insert(item_len_samples_t, item_len_samples)
 
-            table.insert(nmf_cmd_t, nmf_exe .. " -source " .. doublequote(full_path) .. " -resynth " .. doublequote(components_t[i]) ..  " -fftsettings " .. fftsettings .. " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples .. " -components " .. components)
+            table.insert(nmf_cmd_t, 
+                            nmf_exe .. 
+                            " -source " .. doublequote(full_path) .. " -resynth " .. doublequote(components_t[i]) ..  
+                            " -numframes " .. item_len_samples .. " -startframe " .. take_ofs_samples .. 
+                            " -components " .. components .. " -fftsettings " .. fftsettings)
         end
 
         -- Execute NMF Process
@@ -73,7 +79,6 @@ if num_selected_items > 0 then
         end
         reaper.SelectAllMediaItems(0, 0)
         for i=1, num_selected_items do
-        -- you might need to unselect everything first
             if i > 1 then reaper.SetMediaItemSelected(item_t[i-1], false) end
             reaper.SetMediaItemSelected(item_t[i], true)
             reaper.InsertMedia(components_t[i],3)    

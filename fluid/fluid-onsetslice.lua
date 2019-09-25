@@ -9,7 +9,7 @@ local cli_path = get_fluid_path()
 --   Then we form some calls to the tools that will live in that folder --
 local ie_suf = cli_path .. "/index_extractor"
 local ie_exe = doublequote(ie_suf)
-local os_suf = cli_path .. "/onsetslice"
+local os_suf = cli_path .. "/fluid-onsetslice"
 local os_exe = doublequote(os_suf)
 ------------------------------------------------------------------------------------
 
