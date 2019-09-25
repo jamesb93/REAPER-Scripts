@@ -39,6 +39,14 @@ function capture(cmd, raw)
     return s
 end
 
+-- Used for reading CSV files into a variable --
+function readfile(file)
+    local f = assert(io.open(file, "r"))
+    local content = f:read("*all")
+    f:close()
+    return content
+end
+
 function commasplit(input_string)
     -- splits by ,
     local t = {}
