@@ -24,7 +24,7 @@ function rm_trailing_slash(s)
     -- Remove trailing slash from string. Will not remove slash if it is the
     -- only character in the string.
     return s:gsub('(.)%/$', '%1')
-  end
+end
 
 function capture(cmd, raw)
     -- How to use
@@ -54,6 +54,12 @@ function spacesplit(input_string)
     return t
 end
 
+function rmdelim(input_string)
+    local nodots = input_string.gsub(input_string, "%.", "")
+    local nospace = nodots.gsub(nodots, "%s", "")
+    return nospace
+end
+
 function tablelen(t)
   local count = 0
   for _ in pairs(t) do count = count + 1 end
@@ -78,11 +84,11 @@ end
 function is_path_valid(input_string)
     local operating_system = reaper.GetOS()
     local check_table = {}
-    check_table["Win64"] = "/noveltyslice.exe"
-    check_table["OSX64"] = "/noveltyslice"
+    check_table["Win64"] = "/fluid-noveltyslice.exe"
+    check_table["OSX64"] = "/fluid-noveltyslice"
 
     local ns_path = input_string .. check_table[operating_system]
-    reaper.ShowConsoleMsg(ns_path)
+
     if file_exists(ns_path) then
         reaper.SetExtState("flucoma", "exepath", input_string, 1)
         reaper.ShowMessageBox("The path you set looks good!", "Path Configuration", 0)
