@@ -1,7 +1,6 @@
 local info = debug.getinfo(1,'S');
 local full_script_path = info.source
 local script_path = full_script_path:sub(2,-5) -- remove "@" and "file extension" from file name
-print(script_path)
 if reaper.GetOS() == "Win64" or reaper.GetOS() == "Win32" then
   package.path = package.path .. ";" .. script_path:match("(.*".."\\"..")") .. "?.lua"
 else
@@ -19,7 +18,7 @@ function commasplit(input_string)
     return t
 end
 
-local confirm, user_input = reaper.GetUserInputs('Provide JSON info', 2, 'JSON Path:, Cluster Number:', '')
+local confirm, user_input = reaper.GetUserInputs('Provide JSON info', 2, 'JSON Path:, Cluster Number:, extrawidth=100', '')
 
 if confirm then
     reaper.Undo_BeginBlock()
@@ -44,7 +43,7 @@ if confirm then
     local content = file_in:read("*all")
     local cluster_data = json.decode(content)
     for k, p in ipairs(cluster_data[cluster_num]) do
-        reaper.InsertMedia('/Users/jamesbradbury/dev/data_bending/DataAudioUnique/' .. p, 0)
+        reaper.InsertMedia('/Users/james/dev/data_bending/DataAudioUnique/' .. p, 0)
     end
     reaper.SetEditCurPos(0.0, false, false)
     -------- end processing --------
