@@ -20,9 +20,6 @@ if num_selected_items > 0 then
         local max = tonumber(params[2])
 
         local item_t = {}
-        local offset_t = {}
-        local offset_accum = 0
-        local tail_accum = 0
         
         for i=2, num_selected_items do
             -- Current Item
@@ -30,7 +27,6 @@ if num_selected_items > 0 then
             local prev_item_pos = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION")
             local prev_item_len = reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
             local item = reaper.GetSelectedMediaItem(0, i-1)
-            table.insert(item_t, item)
             
             -- Now calculate offsets
             -- The offset is calculated in seconds
@@ -39,7 +35,7 @@ if num_selected_items > 0 then
             
             -- Set new position
             reaper.SetMediaItemInfo_Value(
-                item_t[i-1],
+                item,
                 "D_POSITION",
                 new_position
             )
