@@ -26,26 +26,22 @@ if num_selected_items > 0 then
         
         for i=2, num_selected_items do
             -- Current Item
+            local prev_item = reaper.GetSelectedMediaItem(0, i-2)
+            local prev_item_pos = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION")
+            local prev_item_len = reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
             local item = reaper.GetSelectedMediaItem(0, i-1)
             table.insert(item_t, item)
-            local item_pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
-            local item_len = reaper.GetMediaItemInfo_Value(item, "D_LENGTH")
-
+            
             -- Now calculate offsets
             -- The offset is calculated in seconds
             local random_offset = ((math.random() * ((max-min)+0.000000000001) + min)) / 1000.0
-            local tail_position = item_pos + item_len
-            table.insert(offset_t, offset_accum)
-            offset_accum =
+            local new_position = prev_item_pos + prev_item_len + random_offset
             
-        end
-
-        for i=2, num_selected_items do
-            -- Apply the offset
+            -- Set new position
             reaper.SetMediaItemInfo_Value(
                 item_t[i-1],
                 "D_POSITION",
-                offset_t[i-1]
+                new_position
             )
         end
 
