@@ -19,25 +19,36 @@ if num_selected_items > 0 then
         local min = tonumber(params[1])
         local max = tonumber(params[2])
 
-        local item_t = {}
-        
+        local items_t = {}
+
+        -- populate item table
         for i=2, num_selected_items do
-            -- Current Item
-            local prev_item = reaper.GetSelectedMediaItem(0, i-2)
-            local prev_item_pos = reaper.GetMediaItemInfo_Value(prev_item, "D_POSITION")
-            local prev_item_len = reaper.GetMediaItemInfo_Value(prev_item, "D_LENGTH")
-            local item = reaper.GetSelectedMediaItem(0, i-1)
-            
-            -- Now calculate offsets
-            -- The offset is calculated in seconds
-            local random_offset = ((math.random() * ((max-min)+0.000000000001) + min)) / 1000.0
-            local new_position = prev_item_pos + prev_item_len + random_offset
-            
-            -- Set new position
-            reaper.SetMediaItemInfo_Value(
-                item,
-                "D_POSITION",
-                new_position
+            table.insert(
+                items_t, 
+                reaper.GetSelectedMediaItem(0, i-1)
+            )
+        end
+        
+        -- Now reverse iterate
+        while #items_t > 0 do
+            -- local random_offset = 0.3
+            local random_offset = ((math.random() * (max - min)) + min) / 1000
+            -- shift loop (each time move all items the same amount)
+            for i=1, #items_t do
+                local item = items_t[i]
+                local pos = reaper.GetMediaItemInfo_Value(item, "D_POSITION")
+                
+                -- Set new position
+                reaper.SetMediaItemInfo_Value(
+                    item,
+                    "D_POSITION",
+                    pos + random_offset
+                )
+            end
+            -- Remove the left most item
+            table.remove(
+                items_t, 
+                ((#items_t + 1) - #items_t)
             )
         end
 
