@@ -1,5 +1,4 @@
 local num_selected_items = reaper.CountSelectedMediaItems(0)
-local operating_system = reaper.GetOS()
 
 if num_selected_items > 0 then
     for i=1, num_selected_items do
