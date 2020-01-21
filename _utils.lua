@@ -1,13 +1,6 @@
 function DEBUG(string)
     reaper.ShowConsoleMsg(string)
-end
-
-function dbtoa(value)
-    return 10.0^(value / 20.0)
-end
-
-function atodb(value)
-    return (math.log(value, 10) * 20)
+    reaper.ShowConsoleMsg("\n")
 end
 
 function sampstos(samps_in, sr)
@@ -16,11 +9,6 @@ end
 
 function stosamps(secs_in, sr) 
     return math.floor((secs_in * sr) + 0.5)
-end
-
-function remove_file(file_name)
-    local cmd = "rm -rf " .. file_name
-    os.execute(cmd)
 end
 
 function basedir(str,sep)
@@ -33,9 +21,15 @@ function basename(input_string)
 end
 
 function rm_trailing_slash(s)
-    -- Remove trailing slash from string. Will not remove slash if it is the
-    -- only character in the string.
+    -- Remove trailing slash from string. 
+    -- Will not remove slash if it is the only character.
     return s:gsub('(.)%/$', '%1')
+end
+
+function cleanup(path_table)
+    for i=1, #path_table do
+        os.remove(path_table[i])
+    end
 end
 
 function capture(cmd, raw)
@@ -95,10 +89,10 @@ function tablelen(t)
 end
 
 function doublequote(input_string)
-  return '"'..input_string..'"'
+    return '"'..input_string..'"'
 end
----------- Custom operators ----------
 
+---------- Custom operators ----------
 matchers = {
     ['>'] = function (x, y) return x > y end,
     ['<'] = function (x, y) return x < y end,
@@ -108,17 +102,22 @@ matchers = {
 
 
 ---------- Functions for to setting state ----------
-
 function get_fluid_path()
     return reaper.GetExtState("flucoma", "exepath")
 end
 
 function file_exists(name)
-    local f=io.open(name,"r")
-    if f~=nil then io.close(f) return true else return false end
+    local f=reaper.file_exists(name)
+    if f~=nil then 
+        return true 
+    else
+        return false 
+    end
 end
 
+---------- FluidPath setting ----------
 function is_path_valid(input_string)
+    -- Checks to 
     local operating_system = reaper.GetOS()
     local check_table = {}
     check_table["Win64"] = "/fluid-noveltyslice.exe"
@@ -129,6 +128,26 @@ function is_path_valid(input_string)
     if file_exists(ns_path) then
         reaper.SetExtState("flucoma", "exepath", input_string, 1)
         reaper.ShowMessageBox("The path you set looks good!", "Path Configuration", 0)
+        return true
+    else
+        reaper.ShowMessageBox("The path you set doesn't seem to contain the FluCoMa tools. Please try again.", "Path Configuration", 0)
+        reaper.DeleteExtState("flucoma", "exepath", 1)
+        path_setter()
+    end
+end
+
+--- A soft version of is_path_valid
+function is_path_valid_soft(input_string)
+    -- Checks to 
+    local operating_system = reaper.GetOS()
+    local check_table = {}
+    check_table["Win64"] = "/fluid-noveltyslice.exe"
+    check_table["OSX64"] = "/fluid-noveltyslice"
+
+    local ns_path = input_string .. check_table[operating_system]
+
+    if file_exists(ns_path) then
+        reaper.SetExtState("flucoma", "exepath", input_string, 1)
         return true
     else
         reaper.ShowMessageBox("The path you set doesn't seem to contain the FluCoMa tools. Please try again.", "Path Configuration", 0)
@@ -148,7 +167,6 @@ function path_setter()
         reaper.DeleteExtState("flucoma", "exepath", 1)
         return false
     end
-    
 end
 
 function set_fluid_path()
@@ -156,6 +174,7 @@ function set_fluid_path()
 end
 
 function check_state()
+    -- Check that the reaper Key "exepath" has been set
     return reaper.HasExtState("flucoma", "exepath")
 end
 
@@ -165,5 +184,8 @@ function sanity_check()
         if set_fluid_path() == true then return true else return false end
     end
 
-    if check_state() == true then return true end
+    if check_state() == true then 
+        local possible_path = reaper.GetExtState("flucoma", "exepath")
+        if is_path_valid_soft(possible_path) == true then return true else return false end -- make sure the path is still okay, perhaps its moved...
+    end
 end
