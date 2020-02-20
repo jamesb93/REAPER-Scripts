@@ -1,3 +1,7 @@
+local info = debug.getinfo(1,'S');
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+dofile(script_path .. "_utils.lua")
+
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 
 if num_selected_items > 0 then
