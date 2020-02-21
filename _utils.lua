@@ -3,6 +3,16 @@ function DEBUG(string)
     reaper.ShowConsoleMsg("\n")
 end
 
+function linspace(minimum, maximum, resolution) 
+    local range = maximum - minimum
+    local step_size = range / resolution
+    local t_linspace = {}
+    for i=1, resolution do
+        table.insert(t_linspace, i * step_size)
+    end
+    return t_linspace
+end
+
 function sampstos(samps_in, sr)
     return samps_in / sr
 end
@@ -12,7 +22,7 @@ function stosamps(secs_in, sr)
 end
 
 function basedir(str,sep)
-    sep=sep or'/'
+    local sep=sep or'/'
     return str:match("(.*"..sep..")")
 end
 
