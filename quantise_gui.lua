@@ -11,21 +11,30 @@ end
 loadfile(lib_path .. "Core.lua")()
 
 GUI.req("Classes/Class - Slider.lua")()
+GUI.req("Classes/Class - Label.lua")()
 if missing_lib then return 0 end -- If any of the requested libraries weren't found, abort the script.
 
 -- DEFINE INTERFACE --
-GUI.version = 0
 GUI.New("quantise_amt", "Slider", {
-    z = 11,
+    z = 1,
     x = 10,
     y = 20,
     w = 400,
     min = 1,
-    max = 5000,
+    max = 2000,
     defaults = 100,
 })
 
-GUI.x, GUI.y, GUI.w, GUI.h = 200, 200, 500, 60
+GUI.New("quantise_label", "Label", {
+    z = 2,
+    x = 420,
+    y = 20,
+    font = 3,
+    caption = "quantise",
+    shadow = 0
+})
+
+GUI.x, GUI.y, GUI.w, GUI.h = 200, 200, 500, 70
 
 -- DEFINE LOGIC
 previous_spacing = GUI.Val("quantise_amt")
@@ -33,6 +42,7 @@ function do_loop()
     local spacing = GUI.Val("quantise_amt")
     if previous_spacing ~= spacing then
         previous_spacing = spacing
+        reaper.Undo_BeginBlock()
         local num_selected_items = reaper.CountSelectedMediaItems(0)
         if num_selected_items > 0 then
             -- Algorithm Parameters
@@ -73,14 +83,15 @@ function do_loop()
             end
             
             reaper.UpdateArrange()
+            reaper.Undo_EndBlock("Quantiser", 0)
         end
     end
 end
 
+GUI.version = 0
 GUI.func = do_loop
 GUI.freq = 0
 
-reaper.Undo_BeginBlock()
+
 GUI.Init()
 GUI.Main()
-reaper.Undo_EndBlock("Quantiser", 0)
