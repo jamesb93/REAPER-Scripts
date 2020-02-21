@@ -1,11 +1,6 @@
-function commasplit(input_string)
-    -- splits by ,
-    local t = {}
-    for word in string.gmatch(input_string, '([^,]+)') do
-        table.insert(t, word)
-    end
-    return t
-end
+local info = debug.getinfo(1,'S');
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+dofile(script_path .. "_utils.lua")
 
 function linspace(minimum, maximum, resolution) 
     local range = maximum - minimum
