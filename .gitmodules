@@ -1,0 +1,3 @@
+[submodule "scythe"]
+	path = scythe
+	url = https://github.com/jalovatt/scythe.git
