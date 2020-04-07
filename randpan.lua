@@ -1,7 +1,6 @@
 local info = debug.getinfo(1,'S');
 local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
-dofile(script_path .. "_utils.lua")
-
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 math.randomseed(os.clock() * 100000000000) -- random seed
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
@@ -10,7 +9,7 @@ if num_selected_items > 0 then
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
-        local params = commasplit(user_inputs)
+        local params = fluidUtils.commasplit(user_inputs)
         local min = tonumber(params[1])
         local max = tonumber(params[2])
 

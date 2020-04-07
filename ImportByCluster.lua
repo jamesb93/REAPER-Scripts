@@ -6,17 +6,9 @@ if reaper.GetOS() == "Win64" or reaper.GetOS() == "Win32" then
 else
   package.path = package.path .. ";" .. script_path:match("(.*".."/"..")") .. "?.lua"
 end
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 local json = require 'json'
-
-function commasplit(input_string)
-    -- splits by ,
-    local t = {}
-    for word in string.gmatch(input_string, '([^,]+)') do
-        table.insert(t, word)
-    end
-    return t
-end
 
 local confirm, user_input = reaper.GetUserInputs('Provide JSON info', 2, 'JSON Path:, Cluster Number:, extrawidth=100', '')
 

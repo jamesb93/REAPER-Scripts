@@ -1,21 +1,6 @@
-function commasplit(input_string)
-    -- splits by ,
-    local t = {}
-    for word in string.gmatch(input_string, '([^,]+)') do
-        table.insert(t, word)
-    end
-    return t
-end
-
-function linspace(minimum, maximum, resolution) 
-    local range = maximum - minimum
-    local step_size = range / resolution
-    local t_linspace = {}
-    for i=1, resolution do
-        table.insert(t_linspace, i * step_size)
-    end
-    return t_linspace
-end
+local info = debug.getinfo(1,'S');
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 math.randomseed(os.clock() * 100000000000) -- random seed
 
@@ -27,13 +12,13 @@ if num_selected_items > 0 then
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
-        local params = commasplit(user_inputs)
+        local params = fluidUtils.commasplit(user_inputs)
         local min = tonumber(params[1])
         local max = tonumber(params[2])
         local noise_factor = tonumber(params[3])
         local exponent = tonumber(params[4])
         
-        local points = linspace(min, max, num_selected_items)
+        local points = fluidUtils.linspace(min, max, num_selected_items)
         local items_t = {}
 
         -- populate item table

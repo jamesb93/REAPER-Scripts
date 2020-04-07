@@ -1,16 +1,6 @@
 local info = debug.getinfo(1,'S');
 local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
-dofile(script_path .. "_utils.lua")
-
-function linspace(minimum, maximum, resolution) 
-    local range = maximum - minimum
-    local step_size = range / resolution
-    local t_linspace = {}
-    for i=1, resolution do
-        table.insert(t_linspace, i * step_size)
-    end
-    return t_linspace
-end
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 local num_selected_items = reaper.CountSelectedMediaItems(0)
 if num_selected_items > 0 then
@@ -20,10 +10,10 @@ if num_selected_items > 0 then
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
-        local params = commasplit(user_inputs)
+        local params = fluidUtils.commasplit(user_inputs)
         local spacing = tonumber(params[1])
         
-        local points = linspace(0, spacing * num_selected_items, num_selected_items)
+        local points = fluidUtils.linspace(0, spacing * num_selected_items, num_selected_items)
         local items_t = {}
         local first_item_pos = reaper.GetMediaItemInfo_Value(reaper.GetSelectedMediaItem(0, 0), "D_POSITION")
 
@@ -62,4 +52,3 @@ if num_selected_items > 0 then
         reaper.Undo_EndBlock("Quantiser", 0)
     end
 end
-::exit::

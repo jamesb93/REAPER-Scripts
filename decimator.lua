@@ -1,6 +1,6 @@
 local info = debug.getinfo(1,'S');
 local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
-dofile(script_path .. "_utils.lua")
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 math.randomseed(os.clock() * 100000000000) -- random seed
 
@@ -10,8 +10,8 @@ if num_selected_items > 0 then
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
-        local params = commasplit(user_inputs)
-        local percentage = tonumber(params[1])
+        local params = fluidUtils.commasplit(user_inputs)
+        local percentage = fluidUtils.tonumber(params[1])
         local item_t = {}
         
         for i=1, num_selected_items do
@@ -28,4 +28,3 @@ if num_selected_items > 0 then
         reaper.Undo_EndBlock("Decimator", 0)
     end
 end
-::exit::

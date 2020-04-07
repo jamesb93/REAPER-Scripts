@@ -1,7 +1,6 @@
 local info = debug.getinfo(1,'S');
 local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
-dofile(script_path .. "_utils.lua")
-
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 local reaper = reaper
 local num_selected_items = reaper.CountSelectedMediaItems(0)

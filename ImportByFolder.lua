@@ -1,37 +1,6 @@
-function commasplit(input_string)
-  -- splits by ,
-  local t = {}
-  for word in string.gmatch(input_string, '([^,]+)') do
-      table.insert(t, word)
-  end
-  return t
-end
-
-function doublequote(input_string)
-  return '"'..input_string..'"'
-end
-
-function os.stdin(cmd, raw)
-  -- How to use
-  -- local output = capture("ls", false)
-  local f = assert(io.popen(cmd, 'r'))
-  local s = assert(f:read('*a'))
-  f:close()
-  if raw then return s end
-  s = string.gsub(s, '^%s+', '')
-  s = string.gsub(s, '%s+$', '')
-  s = string.gsub(s, '[\n\r]+', ' ')
-  return s
-end
-
-function rm_trail_slash(s)
-  return s:gsub('(.)%/$', '%1')
-end
-
-function spacesplit(s)
-  local t = {}
-  for w in s:gmatch("%S+") do table.insert(t, w) return t end
-end
+local info = debug.getinfo(1,'S');
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
 
 local confirm, user_input = reaper.GetUserInputs('Provide Folder Path', 1, 'Folder Path:', '')
 if confirm then
@@ -48,16 +17,19 @@ if confirm then
   end
 
   -- parse user input --
-  local fields = commasplit(user_input)
+  local fields = fluidUtils.commasplit(user_input)
   local folder = fields[1]
-  local sanitised_folder = rm_trail_slash(folder)
+  local sanitised_folder = fluidUtils.rm_trail_slash(folder)
 
   -- Do folder processing --
-  local cmd = "ls" .. " " .. doublequote(folder)
+  local cmd = "ls " .. fluidUtils.doublequote(folder)
   local files = os.stdin(cmd)
-  local split_files = spacesplit(files)
+  local split_files = fluidUtils.spacesplit(files)
   for k, p in ipairs(split_files) do
-    reaper.InsertMedia(doublequote(folder .. "/" .. p), 0)
+    reaper.InsertMedia(
+      fluidUtils.doublequote(folder .. "/" .. p), 
+      0
+    )
   end
   reaper.SetEditCurPos(0.0, false, false)
 
