@@ -77,8 +77,6 @@ function do_loop()
     item_now = reaper.GetSelectedMediaItem(0, 0)
 
     -- Store the states of parameters
-
-
     -- Check that the item selection has been modified
     if num_selected_items ~= num_selected_items_prev or item_now ~= item_prev or then
         -- Snapshot the initial value of every selected item

@@ -1,6 +1,9 @@
 local info = debug.getinfo(1,'S');
 local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
-dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
+package.path = package.path .. ";" .. script_path .. "?.lua"
+loadfile(script_path .. "ReaCoMa/lib/reacoma.lua")()
+
+local random = math.random
 
 math.randomseed(os.clock() * 100000000000) -- random seed
 
@@ -10,8 +13,8 @@ if num_selected_items > 0 then
     if confirm then
         reaper.Undo_BeginBlock()
         -- Algorithm Parameters
-        local params = fluidUtils.commasplit(user_inputs)
-        local percentage = fluidUtils.tonumber(params[1])
+        local params = reacoma.utils.commasplit(user_inputs)
+        local percentage = tonumber(params[1])
         local item_t = {}
         
         for i=1, num_selected_items do
@@ -20,7 +23,7 @@ if num_selected_items > 0 then
         end
         
         for i=1, num_selected_items do
-            local state = math.random() * 100.0 < percentage
+            local state = random() * 100.0 < percentage
             reaper.SetMediaItemSelected(item_t[i], state)
         end
 

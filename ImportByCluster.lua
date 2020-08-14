@@ -1,12 +1,7 @@
 local info = debug.getinfo(1,'S');
-local full_script_path = info.source
-local script_path = full_script_path:sub(2,-5) -- remove "@" and "file extension" from file name
-if reaper.GetOS() == "Win64" or reaper.GetOS() == "Win32" then
-  package.path = package.path .. ";" .. script_path:match("(.*".."\\"..")") .. "?.lua"
-else
-  package.path = package.path .. ";" .. script_path:match("(.*".."/"..")") .. "?.lua"
-end
-dofile(script_path .. "ReaCoMa/FluidPlumbing/FluidUtils.lua")
+local script_path = info.source:match[[^@?(.*[\/])[^\/]-$]]
+package.path = package.path .. ";" .. script_path .. "?.lua"
+loadfile(script_path .. "ReaCoMa/lib/reacoma.lua")()
 
 local json = require 'json'
 
@@ -26,7 +21,7 @@ if confirm then
     end
 
     -- Parse user input --
-    local fields = commasplit(user_input)
+    local fields = reacoma.utils.commasplit(user_input)
     local json_path = fields[1]
     local cluster_num = fields[2]
 
@@ -35,9 +30,8 @@ if confirm then
     local content = file_in:read("*all")
     local cluster_data = json.decode(content)
     for k, p in ipairs(cluster_data[cluster_num]) do
-        reaper.InsertMedia('/Users/james/dev/data_bending/DataAudioUnique/' .. p, 0)
+        reaper.InsertMedia(p, 0)
     end
     reaper.SetEditCurPos(0.0, false, false)
-    -------- end processing --------
     reaper.Undo_EndBlock("Insert Media Cluster", 0)
 end
